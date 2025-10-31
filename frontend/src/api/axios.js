@@ -27,9 +27,21 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+
+    if (status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    } else if (status === 403) {
+      if (window.location.pathname !== '/error/forbidden') {
+        window.location.href = '/error/forbidden'
+      }
+    } else if (status && status >= 500) {
+      if (window.location.pathname !== '/error/server') {
+        window.location.href = '/error/server'
+      }
     }
     return Promise.reject(error)
   }

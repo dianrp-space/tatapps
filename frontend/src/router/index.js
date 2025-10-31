@@ -9,6 +9,22 @@ const routes = [
     meta: { guest: true }
   },
   {
+    path: '/error/forbidden',
+    name: 'ErrorForbidden',
+    component: () => import('@/views/error/Forbidden.vue'),
+    meta: {
+      title: 'Akses Ditolak'
+    }
+  },
+  {
+    path: '/error/server',
+    name: 'ErrorServer',
+    component: () => import('@/views/error/ServerError.vue'),
+    meta: {
+      title: 'Kesalahan Sistem'
+    }
+  },
+  {
     path: '/',
     component: () => import('@/layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
@@ -276,6 +292,14 @@ const routes = [
         redirect: '/settings/profile'
       }
     ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/error/NotFound.vue'),
+    meta: {
+      title: 'Halaman Tidak Ditemukan'
+    }
   }
 ]
 
@@ -346,12 +370,12 @@ router.beforeEach(async (to, from, next) => {
     })
 
     if (allPermissions.size && !authStore.hasAllPermissions([...allPermissions])) {
-      next('/')
+      next('/error/forbidden')
       return
     }
 
     if (anyPermissions.size && !authStore.hasAnyPermission([...anyPermissions])) {
-      next('/')
+      next('/error/forbidden')
       return
     }
   }

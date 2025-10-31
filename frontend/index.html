@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TatApps - All in One Business Management</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- Early error overlay: captures errors/unhandled rejections before app mount and shows a visible banner -->
+    <script>
+      (function(){
+        function showOverlay(msg){
+          try{
+            if(document.getElementById('__client_error_overlay')){
+              document.getElementById('__client_error_overlay').innerText = msg;
+              return;
+            }
+            var css = 'position:fixed;left:0;right:0;top:0;background:#fff3f3;border-bottom:2px solid #ff4d4f;color:#000;padding:12px;z-index:2147483647;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;white-space:pre-wrap;';
+            var d = document.createElement('div');
+            d.id = '__client_error_overlay';
+            d.style.cssText = css;
+            d.innerText = msg;
+            document.body.appendChild(d);
+          }catch(e){console.log('overlay error', e)}
+        }
+
+        window.addEventListener('error', function(e){
+          var m = (e && e.error && e.error.stack) || (e && e.message) || 'Unknown error';
+          if(e.filename) m += '\n at ' + e.filename + ':' + (e.lineno||'?') + ':' + (e.colno||'?');
+          showOverlay(m);
+          // still log to console
+          try{console.error(e.error || e.message || e);}catch(_){}
+        });
+
+        window.addEventListener('unhandledrejection', function(e){
+          var reason = e && e.reason;
+          var m = reason && reason.stack ? reason.stack : String(reason);
+          showOverlay('UnhandledRejection: ' + m);
+          try{console.error(reason);}catch(_){}
+        });
+
+        // patch console.error to also show overlay (last-resort)
+        try{
+          var __origConsoleError = console.error.bind(console);
+          console.error = function(){
+            try{ var txt = Array.prototype.slice.call(arguments).map(function(a){try{return typeof a==='object'?JSON.stringify(a):String(a)}catch(e){return String(a)}}).join(' '); showOverlay(txt); }catch(e){}
+            __origConsoleError.apply(console, arguments);
+          };
+        }catch(e){}
+      })();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

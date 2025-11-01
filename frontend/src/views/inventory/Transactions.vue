@@ -872,12 +872,17 @@ const canSelectItem = computed(() => {
 
 const destinationWarehouseOptions = computed(() => {
   const excludeId = toNumericId(transactionForm.value.from_warehouse_id)
-  if (!excludeId) {
-    return warehouses.value || []
-  }
-  return (warehouses.value || []).filter(warehouse => {
-    const warehouseId = toNumericId(warehouse.id)
-    return warehouseId !== null && warehouseId !== excludeId
+  const source = isEmployee.value ? rawWarehouses.value : warehouses.value
+  const baseList = Array.isArray(source) ? source : []
+  return baseList.filter(warehouse => {
+    const warehouseId = toNumericId(warehouse?.id)
+    if (warehouseId === null) {
+      return false
+    }
+    if (!excludeId) {
+      return true
+    }
+    return warehouseId !== excludeId
   })
 })
 
@@ -1221,11 +1226,11 @@ async function saveTransaction() {
 
   if (isEmployee.value) {
     if (transactionForm.value.type === 'transfer') {
-      if (!isWarehouseAllowed(transactionForm.value.from_warehouse_id) || !isWarehouseAllowed(transactionForm.value.to_warehouse_id)) {
+      if (!isWarehouseAllowed(transactionForm.value.from_warehouse_id)) {
         toast.add({
           severity: 'warn',
           summary: 'Access Restricted',
-          detail: 'Selected warehouses are not permitted for your account',
+          detail: 'Selected source warehouse is not permitted for your account',
           life: 3000
         })
         return

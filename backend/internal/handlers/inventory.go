@@ -673,16 +673,6 @@ func (h *InventoryHandler) RecordTransaction(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "You are not allowed to record transactions for this warehouse"})
 			return
 		}
-		if transaction.Type == "transfer" {
-			if transaction.ToWarehouseID == nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Destination warehouse is required for transfer"})
-				return
-			}
-			if _, exists := allowedSet[*transaction.ToWarehouseID]; !exists {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Destination warehouse is not permitted"})
-				return
-			}
-		}
 	}
 
 	// Begin transaction

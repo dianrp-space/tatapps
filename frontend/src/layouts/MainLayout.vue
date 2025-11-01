@@ -262,15 +262,36 @@ const isMobileSidebarOpen = ref(false)
 const isProfileMenuOpen = ref(false)
 const profileMenuRef = ref(null)
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'
+
+const fileBaseUrl = (() => {
+  try {
+    const url = new URL(apiBaseUrl)
+    url.pathname = url.pathname.replace(/\/api\/v1\/?$/, '')
+    const path = url.pathname.replace(/\/$/, '')
+    return `${url.origin}${path}`
+  } catch {
+    return apiBaseUrl.replace(/\/api\/v1\/?$/, '')
+  }
+})()
+
+function resolveAssetUrl(path) {
+  if (!path) return ''
+  if (path.startsWith('http') || path.startsWith('data:')) {
+    return path
+  }
+  const base = fileBaseUrl || apiBaseUrl
+  const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
+  return `${normalizedBase}/${normalizedPath}`
+}
+
 // Computed avatar URL
 const avatarUrl = computed(() => {
   if (!authStore.user?.avatar) {
     return 'https://via.placeholder.com/40'
   }
-  if (authStore.user.avatar.startsWith('http')) {
-    return authStore.user.avatar
-  }
-  return `http://localhost:8080/${authStore.user.avatar}`
+  return resolveAssetUrl(authStore.user.avatar) || 'https://via.placeholder.com/40'
 })
 
 const roleMenuKeys = computed(() => {
